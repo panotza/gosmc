@@ -66,6 +66,11 @@ func (bs UInt32Char) toC() C.UInt32Char_t {
 	return xs
 }
 
+// ToString return as string
+func (bs UInt32Char) ToString() string {
+	return string(bs[:])
+}
+
 func uint32CharFromC(xs C.UInt32Char_t) UInt32Char {
 	var bs UInt32Char
 	for i := range xs {
