@@ -1,3 +1,5 @@
+// +build darwin
+
 package gosmc
 
 // #cgo CFLAGS: -O2 -Wall
