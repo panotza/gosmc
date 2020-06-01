@@ -24,6 +24,7 @@ cc ./smc.c  -o smcutil -framework IOKit -framework CoreFoundation -Wno-four-char
 #include <IOKit/IOKitLib.h>
 #include <Kernel/string.h>
 #include <libkern/OSAtomic.h>
+#include <os/lock.h>
 
 #include "smc.h"
 
@@ -35,7 +36,7 @@ struct {
 } g_keyInfoCache[KEY_INFO_CACHE_SIZE];
 
 int g_keyInfoCacheCount = 0;
-OSSpinLock g_keyInfoSpinLock = 0;
+os_unfair_lock g_keyInfoSpinLock = OS_UNFAIR_LOCK_INIT;
 
 UInt32 _strtoul(const char *str, int size, int base)
 {
@@ -129,7 +130,7 @@ kern_return_t SMCGetKeyInfo(io_connect_t conn, UInt32 key, SMCKeyData_keyInfo_t*
 	kern_return_t result = kIOReturnSuccess;
 	int i = 0;
 
-	OSSpinLockLock(&g_keyInfoSpinLock);
+	os_unfair_lock_lock(&g_keyInfoSpinLock);
 
 	for (; i < g_keyInfoCacheCount; ++i)
 	{
@@ -162,7 +163,7 @@ kern_return_t SMCGetKeyInfo(io_connect_t conn, UInt32 key, SMCKeyData_keyInfo_t*
 		}
 	}
 
-	OSSpinLockUnlock(&g_keyInfoSpinLock);
+	os_unfair_lock_unlock(&g_keyInfoSpinLock);
 
 	return result;
 }
